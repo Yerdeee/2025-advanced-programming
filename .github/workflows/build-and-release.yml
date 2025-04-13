@@ -62,11 +62,11 @@ jobs:
     strategy:
       matrix:
         project:
-          - week6/kotlin/adapter_pattern/AdapterPatternApp
-          - week6/kotlin/decorator_pattern/DecoratorPatternApp
-          - week6/kotlin/facade_pattern/FacadePatternApp
-          - week6/kotlin/method_chaining_pattern/MethodChainingPattern
-          - week6/kotlin/method_chaining_pattern/builder_pattern/BuilderPatternApp
+          - week6/kotlin/adapter_pattern
+          - week6/kotlin/decorator_pattern
+          - week6/kotlin/facade_pattern
+          - week6/kotlin/method_chaining_pattern
+          - week6/kotlin/method_chaining_pattern/builder_pattern
 
     steps:
       - uses: actions/checkout@v3
