@@ -1,0 +1,74 @@
+name: Build and Release
+
+on:
+  push:
+    branches:
+      - main  # 'main' 브랜치에 푸시할 때마다 실행
+  pull_request:
+    branches:
+      - main  # 'main' 브랜치로 PR이 열릴 때마다 실행
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    strategy:
+      matrix:
+        language: [cpp, csharp, kotlin]  # 컴파일할 언어들을 지정
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v2
+
+    - name: Set up environment for ${{ matrix.language }}
+      run: |
+        if [ "${{ matrix.language }}" == "cpp" ]; then
+          sudo apt update
+          sudo apt install -y g++
+        elif [ "${{ matrix.language }}" == "csharp" ]; then
+          sudo apt update
+          sudo apt install -y dotnet-sdk-5.0
+        elif [ "${{ matrix.language }}" == "kotlin" ]; then
+          sudo apt update
+          sudo apt install -y openjdk-11-jdk
+          wget -qO- https://github.com/JetBrains/kotlin/releases/download/v1.5.0/kotlin-compiler-1.5.0.zip | unzip -d /tmp
+          export PATH=/tmp/kotlin-compiler-1.5.0/bin:$PATH
+        fi
+
+    - name: Compile ${{ matrix.language }} code
+      run: |
+        if [ "${{ matrix.language }}" == "cpp" ]; then
+          cd ${{ matrix.language }}  # cpp 폴더로 이동
+          g++ -o output/main main.cpp  # C++ 컴파일
+        elif [ "${{ matrix.language }}" == "csharp" ]; then
+          cd ${{ matrix.language }}  # csharp 폴더로 이동
+          dotnet build  # C# 컴파일
+        elif [ "${{ matrix.language }}" == "kotlin" ]; then
+          cd ${{ matrix.language }}  # kotlin 폴더로 이동
+          kotlinc Main.kt -include-runtime -d output.jar  # Kotlin 컴파일
+        fi
+
+    - name: Archive compiled files
+      run: |
+        mkdir -p compiled/${{ matrix.language }}
+        if [ "${{ matrix.language }}" == "cpp" ]; then
+          mv ${{ matrix.language }}/output/main compiled/${{ matrix.language }}/main  # C++ 바이너리 이동
+        elif [ "${{ matrix.language }}" == "csharp" ]; then
+          mv ${{ matrix.language }}/bin/Debug/net5.0/* compiled/${{ matrix.language }}/  # C# 바이너리 이동
+        elif [ "${{ matrix.language }}" == "kotlin" ]; then
+          mv ${{ matrix.language }}/output.jar compiled/${{ matrix.language }}/  # Kotlin JAR 파일 이동
+        fi
+
+  release:
+    needs: build
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v2
+
+    - name: Create release
+      uses: ncipollo/release-action@v1
+      with:
+        artifacts: compiled  # 압축할 폴더 지정
+        tag: ${{ github.sha }}  # 릴리즈 태그는 커밋 SHA로 설정
