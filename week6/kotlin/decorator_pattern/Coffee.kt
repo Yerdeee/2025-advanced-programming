@@ -6,7 +6,7 @@ open class Coffee {
 }
 
 // 커피 데코레이터 클래스 (기본 커피 객체를 감싸는 클래스)
-open class CoffeeDecorator(private val coffee: Coffee) : Coffee() {
+open class CoffeeDecorator(protected val coffee: Coffee) : Coffee() {
     override fun cost(): Int {
         return coffee.cost()
     }
