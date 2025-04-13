@@ -71,19 +71,17 @@ jobs:
     steps:
       - uses: actions/checkout@v3
 
-      - name: Setup Java
-        uses: actions/setup-java@v3
-        with:
-          distribution: 'temurin'
-          java-version: '17'
+      - name: Setup Gradle
+        uses: gradle/gradle-build-action@v2
 
       - name: Build Kotlin Project
         run: |
-          cd ${{ matrix.project }}
-          ./gradlew build
+          cd ${{ matrix.folder }}
+          gradle build
           cd ../..
-          mkdir -p build_outputs/kotlin/$(basename ${{ matrix.project }})
-          cp ${{ matrix.project }}/build/libs/*.jar build_outputs/kotlin/$(basename ${{ matrix.project }})/
+          mkdir -p build_outputs/kotlin/$(basename ${{ matrix.folder }})
+          cp ${{ matrix.folder }}/build/libs/*.jar build_outputs/kotlin/$(basename ${{ matrix.folder }})/
+
 
   release:
     name: Create GitHub Release
