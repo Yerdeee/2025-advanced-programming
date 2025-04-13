@@ -12,11 +12,11 @@ jobs:
     strategy:
       matrix:
         project:
-          - csharp/adapter_pattern/AdapterPatternApp
-          - csharp/decorator_pattern/DecoratorPatternApp
-          - csharp/facade_pattern/FacadePatternApp
-          - csharp/builder_pattern/BuilderPatternApp
-          - csharp/method_chaining_pattern/builder_pattern/BuilderPatternApp
+          - csharp/adapter_pattern/AdapterPatternApp/AdapterPatternApp.csproj
+          - csharp/decorator_pattern/DecoratorPatternApp/DecoratorPatternApp.csproj
+          - csharp/facade_pattern/FacadePatternApp/FacadePatternApp.csproj
+          - csharp/method_chaining_pattern/MethodChainingPatternApp/MethodChainingPatternApp.csproj
+          - csharp/method_chaining_pattern/builder_pattern/BuilderPatternApp/BuilderPatternApp.csproj
 
     steps:
       - uses: actions/checkout@v3
@@ -29,8 +29,9 @@ jobs:
       - name: Build C# Project
         run: |
           dotnet build ${{ matrix.project }} --configuration Release
-          mkdir -p build_outputs/csharp/$(basename ${{ matrix.project }})
-          cp -r ${{ matrix.project }}/bin/Release/* build_outputs/csharp/$(basename ${{ matrix.project }})/
+          project_dir=$(dirname ${{ matrix.project }})
+          mkdir -p build_outputs/csharp/$(basename $project_dir)
+          cp -r $project_dir/bin/Release/* build_outputs/csharp/$(basename $project_dir)/
 
   build-cpp:
     name: Build C++ Projects
