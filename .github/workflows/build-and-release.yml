@@ -39,11 +39,11 @@ jobs:
     strategy:
       matrix:
         project:
-          - cpp/adapter_pattern
-          - cpp/decorator_pattern
-          - cpp/facade_pattern
-          - cpp/builder_pattern
-          - cpp/method_chaining_pattern/builder_pattern
+          - week6/cpp/adapter_pattern
+          - week6/cpp/decorator_pattern
+          - week6/cpp/facade_pattern
+          - week6/cpp/method_chaining_pattern
+          - week6/cpp/method_chaining_pattern/builder_pattern
 
     steps:
       - uses: actions/checkout@v3
@@ -62,11 +62,11 @@ jobs:
     strategy:
       matrix:
         project:
-          - kotlin/adapter_pattern/AdapterPatternApp
-          - kotlin/decorator_pattern/DecoratorPatternApp
-          - kotlin/facade_pattern/FacadePatternApp
-          - kotlin/builder_pattern/BuilderPatternApp
-          - kotlin/method_chaining_pattern/builder_pattern/BuilderPatternApp
+          - week6/kotlin/adapter_pattern/AdapterPatternApp
+          - week6/kotlin/decorator_pattern/DecoratorPatternApp
+          - week6/kotlin/facade_pattern/FacadePatternApp
+          - week6/kotlin/method_chaining_pattern/MethodChainingPattern
+          - week6/kotlin/method_chaining_pattern/builder_pattern/BuilderPatternApp
 
     steps:
       - uses: actions/checkout@v3
