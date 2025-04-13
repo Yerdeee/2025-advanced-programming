@@ -34,10 +34,16 @@ jobs:
           mkdir -p build_outputs/csharp/$(basename $project_dir)
           cp -r $project_dir/bin/Release/* build_outputs/csharp/$(basename $project_dir)/
 
+      - name: Sanitize artifact name
+        id: sanitize
+        run: |
+          sanitized_name=$(echo "${{ matrix.project }}" | sed 's|/|-|g')
+          echo "name=$sanitized_name" >> $GITHUB_OUTPUT
+
       - name: Upload C# Build Outputs
         uses: actions/upload-artifact@v4
         with:
-          name: csharp-build-outputs-${{ matrix.project }}-${{ github.sha }}  # 고유한 이름으로 수정
+          name: csharp-${{ steps.sanitize.outputs.name }}-${{ github.sha }}
           path: build_outputs/csharp
 
   build-cpp:
@@ -64,10 +70,16 @@ jobs:
           mkdir -p build_outputs/cpp/$(basename ${{ matrix.project }})
           g++ ${{ matrix.project }}/*.cpp -o build_outputs/cpp/$(basename ${{ matrix.project }})/app
 
+      - name: Sanitize artifact name
+        id: sanitize
+        run: |
+          sanitized_name=$(echo "${{ matrix.project }}" | sed 's|/|-|g')
+          echo "name=$sanitized_name" >> $GITHUB_OUTPUT
+
       - name: Upload C++ Build Outputs
         uses: actions/upload-artifact@v4
         with:
-          name: cpp-build-outputs-${{ matrix.project }}-${{ github.sha }}  # 고유한 이름으로 수정
+          name: cpp-${{ steps.sanitize.outputs.name }}-${{ github.sha }}
           path: build_outputs/cpp
 
   build-kotlin:
@@ -96,10 +108,16 @@ jobs:
           mkdir -p $output_dir
           kotlinc $kt_file -include-runtime -d $output_dir/$(basename $kt_file .kt).jar
 
+      - name: Sanitize artifact name
+        id: sanitize
+        run: |
+          sanitized_name=$(echo "${{ matrix.project }}" | sed 's|/|-|g')
+          echo "name=$sanitized_name" >> $GITHUB_OUTPUT
+
       - name: Upload Kotlin Build Outputs
         uses: actions/upload-artifact@v4
         with:
-          name: kotlin-build-outputs-${{ matrix.project }}-${{ github.sha }}  # 고유한 이름으로 수정
+          name: kotlin-${{ steps.sanitize.outputs.name }}-${{ github.sha }}
           path: build_outputs/kotlin
 
   release:
@@ -111,23 +129,10 @@ jobs:
     steps:
       - uses: actions/checkout@v3
 
-      - name: Download C# Build Outputs
+      - name: Download all artifacts
         uses: actions/download-artifact@v4
         with:
-          name: csharp-build-outputs-${{ github.sha }}  # 고유한 이름으로 수정
-          path: build_outputs/csharp
-
-      - name: Download C++ Build Outputs
-        uses: actions/download-artifact@v4
-        with:
-          name: cpp-build-outputs-${{ github.sha }}  # 고유한 이름으로 수정
-          path: build_outputs/cpp
-
-      - name: Download Kotlin Build Outputs
-        uses: actions/download-artifact@v4
-        with:
-          name: kotlin-build-outputs-${{ github.sha }}  # 고유한 이름으로 수정
-          path: build_outputs/kotlin
+          path: build_outputs
 
       - name: Archive build outputs
         run: zip -r release-artifacts.zip build_outputs
