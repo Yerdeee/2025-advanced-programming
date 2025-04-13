@@ -15,6 +15,7 @@ jobs:
           - week6/csharp/adapter_pattern/AdapterPatternApp/AdapterPatternApp.csproj
           - week6/csharp/decorator_pattern/DecoratorPatternApp/DecoratorPatternApp.csproj
           - week6/csharp/facade_pattern/FacadePatternApp/FacadePatternApp.csproj
+          - week6/csharp/factory_method_pattern/FactoryMethodPatternApp/FactoryMethodPatternApp.csproj
           - week6/csharp/method_chaining_pattern/MethodChainingPatternApp/MethodChainingPatternApp.csproj
           - week6/csharp/method_chaining_pattern/builder_pattern/BuilderPatternApp/BuilderPatternApp.csproj
 
@@ -42,6 +43,7 @@ jobs:
           - week6/cpp/adapter_pattern
           - week6/cpp/decorator_pattern
           - week6/cpp/facade_pattern
+          - week6/cpp/factory_method_pattern
           - week6/cpp/method_chaining_pattern
           - week6/cpp/method_chaining_pattern/builder_pattern
 
@@ -62,25 +64,25 @@ jobs:
     strategy:
       matrix:
         project:
-          - week6/kotlin/adapter_pattern
-          - week6/kotlin/decorator_pattern
-          - week6/kotlin/facade_pattern
-          - week6/kotlin/method_chaining_pattern
-          - week6/kotlin/method_chaining_pattern/builder_pattern
+          - week6/kotlin/adapter_pattern/Adapter.kt
+          - week6/kotlin/decorator_pattern/Coffee.kt
+          - week6/kotlin/facade_pattern/Computer.kt
+          - week6/kotlin/factory_method_pattern/Animal.kt
+          - week6/kotlin/method_chaining_pattern/Calculator.kt
+          - week6/kotlin/method_chaining_pattern/builder_pattern/Person.kt
 
     steps:
       - uses: actions/checkout@v3
 
-      - name: Setup Gradle
-        uses: gradle/gradle-build-action@v2
+      - name: Set up Kotlin Compiler
+        run: sudo apt-get update && sudo apt-get install -y kotlin
 
-      - name: Build Kotlin Project
+      - name: Compile Kotlin File to JAR
         run: |
-          cd ${{ matrix.folder }}
-          gradle build
-          cd ../..
-          mkdir -p build_outputs/kotlin/$(basename ${{ matrix.folder }})
-          cp ${{ matrix.folder }}/build/libs/*.jar build_outputs/kotlin/$(basename ${{ matrix.folder }})/
+          kt_file=${{ matrix.project }}
+          output_dir=build_outputs/kotlin/$(basename $(dirname $kt_file))
+          mkdir -p $output_dir
+          kotlinc $kt_file -include-runtime -d $output_dir/$(basename $kt_file .kt).jar
 
 
   release:
