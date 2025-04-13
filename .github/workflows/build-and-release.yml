@@ -35,9 +35,9 @@ jobs:
           cp -r $project_dir/bin/Release/* build_outputs/csharp/$(basename $project_dir)/
 
       - name: Upload C# Build Outputs
-        uses: actions/upload-artifact@v4  # 수정된 버전
+        uses: actions/upload-artifact@v4
         with:
-          name: csharp-build-outputs
+          name: csharp-build-outputs-${{ matrix.project }}-${{ github.sha }}  # 고유한 이름으로 수정
           path: build_outputs/csharp
 
   build-cpp:
@@ -65,9 +65,9 @@ jobs:
           g++ ${{ matrix.project }}/*.cpp -o build_outputs/cpp/$(basename ${{ matrix.project }})/app
 
       - name: Upload C++ Build Outputs
-        uses: actions/upload-artifact@v4  # 수정된 버전
+        uses: actions/upload-artifact@v4
         with:
-          name: cpp-build-outputs
+          name: cpp-build-outputs-${{ matrix.project }}-${{ github.sha }}  # 고유한 이름으로 수정
           path: build_outputs/cpp
 
   build-kotlin:
@@ -97,9 +97,9 @@ jobs:
           kotlinc $kt_file -include-runtime -d $output_dir/$(basename $kt_file .kt).jar
 
       - name: Upload Kotlin Build Outputs
-        uses: actions/upload-artifact@v4  # 수정된 버전
+        uses: actions/upload-artifact@v4
         with:
-          name: kotlin-build-outputs
+          name: kotlin-build-outputs-${{ matrix.project }}-${{ github.sha }}  # 고유한 이름으로 수정
           path: build_outputs/kotlin
 
   release:
@@ -114,19 +114,19 @@ jobs:
       - name: Download C# Build Outputs
         uses: actions/download-artifact@v4
         with:
-          name: csharp-build-outputs
+          name: csharp-build-outputs-${{ github.sha }}  # 고유한 이름으로 수정
           path: build_outputs/csharp
 
       - name: Download C++ Build Outputs
         uses: actions/download-artifact@v4
         with:
-          name: cpp-build-outputs
+          name: cpp-build-outputs-${{ github.sha }}  # 고유한 이름으로 수정
           path: build_outputs/cpp
 
       - name: Download Kotlin Build Outputs
         uses: actions/download-artifact@v4
         with:
-          name: kotlin-build-outputs
+          name: kotlin-build-outputs-${{ github.sha }}  # 고유한 이름으로 수정
           path: build_outputs/kotlin
 
       - name: Archive build outputs
