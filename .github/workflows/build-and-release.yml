@@ -94,8 +94,22 @@ jobs:
     steps:
       - uses: actions/checkout@v3
 
+      - name: Check build outputs
+        run: |
+          if [ ! -d "build_outputs" ]; then
+            echo "Error: build_outputs directory does not exist!"
+            exit 1
+          fi
+          ls -R build_outputs
+
       - name: Archive build outputs
-        run: zip -r release-artifacts.zip build_outputs
+        run: |
+          if [ -d "build_outputs" ]; then
+            zip -r release-artifacts.zip build_outputs
+          else
+            echo "Error: build_outputs folder does not exist!"
+            exit 1
+          fi
 
       - name: Upload GitHub Release
         uses: softprops/action-gh-release@v2
