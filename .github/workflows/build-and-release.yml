@@ -2,73 +2,103 @@ name: Build and Release
 
 on:
   push:
-    branches:
-      - main  # 'main' 브랜치에 푸시할 때마다 실행
+    branches: [main]
   pull_request:
-    branches:
-      - main  # 'main' 브랜치로 PR이 열릴 때마다 실행
 
 jobs:
-  build:
+  build-csharp:
+    name: Build C# Projects
     runs-on: ubuntu-latest
-
     strategy:
       matrix:
-        language: [cpp, csharp, kotlin]  # 컴파일할 언어들을 지정
+        project:
+          - csharp/adapter_pattern/AdapterPatternApp
+          - csharp/decorator_pattern/DecoratorPatternApp
+          - csharp/facade_pattern/FacadePatternApp
+          - csharp/builder_pattern/BuilderPatternApp
+          - csharp/method_chaining_pattern/builder_pattern/BuilderPatternApp
 
     steps:
-    - name: Checkout code
-      uses: actions/checkout@v2
+      - uses: actions/checkout@v3
 
-    - name: Set up environment for ${{ matrix.language }}
-      run: |
-        if [ "${{ matrix.language }}" == "cpp" ]; then
-          sudo apt update
-          sudo apt install -y g++
-        elif [ "${{ matrix.language }}" == "csharp" ]; then
-          sudo apt update
-          sudo apt install -y dotnet-sdk-5.0
-        elif [ "${{ matrix.language }}" == "kotlin" ]; then
-          sudo apt update
-          sudo apt install -y openjdk-11-jdk
-          wget -qO- https://github.com/JetBrains/kotlin/releases/download/v1.5.0/kotlin-compiler-1.5.0.zip | unzip -d /tmp
-          export PATH=/tmp/kotlin-compiler-1.5.0/bin:$PATH
-        fi
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '8.0.x'
 
-    - name: Compile ${{ matrix.language }} code
-      run: |
-        if [ "${{ matrix.language }}" == "cpp" ]; then
-          cd ${{ matrix.language }}  # cpp 폴더로 이동
-          g++ -o output/main main.cpp  # C++ 컴파일
-        elif [ "${{ matrix.language }}" == "csharp" ]; then
-          cd ${{ matrix.language }}  # csharp 폴더로 이동
-          dotnet build  # C# 컴파일
-        elif [ "${{ matrix.language }}" == "kotlin" ]; then
-          cd ${{ matrix.language }}  # kotlin 폴더로 이동
-          kotlinc Main.kt -include-runtime -d output.jar  # Kotlin 컴파일
-        fi
+      - name: Build C# Project
+        run: |
+          dotnet build ${{ matrix.project }} --configuration Release
+          mkdir -p build_outputs/csharp/$(basename ${{ matrix.project }})
+          cp -r ${{ matrix.project }}/bin/Release/* build_outputs/csharp/$(basename ${{ matrix.project }})/
 
-    - name: Archive compiled files
-      run: |
-        mkdir -p compiled/${{ matrix.language }}
-        if [ "${{ matrix.language }}" == "cpp" ]; then
-          mv ${{ matrix.language }}/output/main compiled/${{ matrix.language }}/main  # C++ 바이너리 이동
-        elif [ "${{ matrix.language }}" == "csharp" ]; then
-          mv ${{ matrix.language }}/bin/Debug/net5.0/* compiled/${{ matrix.language }}/  # C# 바이너리 이동
-        elif [ "${{ matrix.language }}" == "kotlin" ]; then
-          mv ${{ matrix.language }}/output.jar compiled/${{ matrix.language }}/  # Kotlin JAR 파일 이동
-        fi
+  build-cpp:
+    name: Build C++ Projects
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        project:
+          - cpp/adapter_pattern
+          - cpp/decorator_pattern
+          - cpp/facade_pattern
+          - cpp/builder_pattern
+          - cpp/method_chaining_pattern/builder_pattern
+
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Install g++
+        run: sudo apt-get update && sudo apt-get install -y g++
+
+      - name: Compile C++ Project
+        run: |
+          mkdir -p build_outputs/cpp/$(basename ${{ matrix.project }})
+          g++ ${{ matrix.project }}/*.cpp -o build_outputs/cpp/$(basename ${{ matrix.project }})/app
+
+  build-kotlin:
+    name: Build Kotlin Projects
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        project:
+          - kotlin/adapter_pattern/AdapterPatternApp
+          - kotlin/decorator_pattern/DecoratorPatternApp
+          - kotlin/facade_pattern/FacadePatternApp
+          - kotlin/builder_pattern/BuilderPatternApp
+          - kotlin/method_chaining_pattern/builder_pattern/BuilderPatternApp
+
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Setup Java
+        uses: actions/setup-java@v3
+        with:
+          distribution: 'temurin'
+          java-version: '17'
+
+      - name: Build Kotlin Project
+        run: |
+          cd ${{ matrix.project }}
+          ./gradlew build
+          cd ../..
+          mkdir -p build_outputs/kotlin/$(basename ${{ matrix.project }})
+          cp ${{ matrix.project }}/build/libs/*.jar build_outputs/kotlin/$(basename ${{ matrix.project }})/
 
   release:
-    needs: build
+    name: Create GitHub Release
+    needs: [build-csharp, build-cpp, build-kotlin]
     runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
 
     steps:
-    - name: Checkout code
-      uses: actions/checkout@v2
+      - uses: actions/checkout@v3
 
-    - name: Create release
-      uses: ncipollo/release-action@v1
-      with:
-        artifacts: compiled  # 압축할 폴더 지정
-        tag: ${{ github.sha }}  # 릴리즈 태그는 커밋 SHA로 설정
+      - name: Archive build outputs
+        run: zip -r release-artifacts.zip build_outputs
+
+      - name: Upload GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          files: release-artifacts.zip
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
