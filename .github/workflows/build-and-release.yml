@@ -12,11 +12,11 @@ jobs:
     strategy:
       matrix:
         project:
-          - csharp/adapter_pattern/AdapterPatternApp/AdapterPatternApp.csproj
-          - csharp/decorator_pattern/DecoratorPatternApp/DecoratorPatternApp.csproj
-          - csharp/facade_pattern/FacadePatternApp/FacadePatternApp.csproj
-          - csharp/method_chaining_pattern/MethodChainingPatternApp/MethodChainingPatternApp.csproj
-          - csharp/method_chaining_pattern/builder_pattern/BuilderPatternApp/BuilderPatternApp.csproj
+          - week6/csharp/adapter_pattern/AdapterPatternApp/AdapterPatternApp.csproj
+          - week6/csharp/decorator_pattern/DecoratorPatternApp/DecoratorPatternApp.csproj
+          - week6/csharp/facade_pattern/FacadePatternApp/FacadePatternApp.csproj
+          - week6/csharp/method_chaining_pattern/MethodChainingPatternApp/MethodChainingPatternApp.csproj
+          - week6/csharp/method_chaining_pattern/builder_pattern/BuilderPatternApp/BuilderPatternApp.csproj
 
     steps:
       - uses: actions/checkout@v3
