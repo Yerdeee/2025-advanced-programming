@@ -34,6 +34,12 @@ jobs:
           mkdir -p build_outputs/csharp/$(basename $project_dir)
           cp -r $project_dir/bin/Release/* build_outputs/csharp/$(basename $project_dir)/
 
+      - name: Upload C# Build Outputs
+        uses: actions/upload-artifact@v3
+        with:
+          name: csharp-build-outputs
+          path: build_outputs/csharp
+
   build-cpp:
     name: Build C++ Projects
     runs-on: ubuntu-latest
@@ -57,6 +63,12 @@ jobs:
         run: |
           mkdir -p build_outputs/cpp/$(basename ${{ matrix.project }})
           g++ ${{ matrix.project }}/*.cpp -o build_outputs/cpp/$(basename ${{ matrix.project }})/app
+
+      - name: Upload C++ Build Outputs
+        uses: actions/upload-artifact@v3
+        with:
+          name: cpp-build-outputs
+          path: build_outputs/cpp
 
   build-kotlin:
     name: Build Kotlin Projects
@@ -84,6 +96,11 @@ jobs:
           mkdir -p $output_dir
           kotlinc $kt_file -include-runtime -d $output_dir/$(basename $kt_file .kt).jar
 
+      - name: Upload Kotlin Build Outputs
+        uses: actions/upload-artifact@v3
+        with:
+          name: kotlin-build-outputs
+          path: build_outputs/kotlin
 
   release:
     name: Create GitHub Release
@@ -94,22 +111,26 @@ jobs:
     steps:
       - uses: actions/checkout@v3
 
-      - name: Check build outputs
-        run: |
-          if [ ! -d "build_outputs" ]; then
-            echo "Error: build_outputs directory does not exist!"
-            exit 1
-          fi
-          ls -R build_outputs
+      - name: Download Build Outputs
+        uses: actions/download-artifact@v3
+        with:
+          name: csharp-build-outputs
+          path: build_outputs/csharp
+
+      - name: Download Build Outputs (C++)
+        uses: actions/download-artifact@v3
+        with:
+          name: cpp-build-outputs
+          path: build_outputs/cpp
+
+      - name: Download Build Outputs (Kotlin)
+        uses: actions/download-artifact@v3
+        with:
+          name: kotlin-build-outputs
+          path: build_outputs/kotlin
 
       - name: Archive build outputs
-        run: |
-          if [ -d "build_outputs" ]; then
-            zip -r release-artifacts.zip build_outputs
-          else
-            echo "Error: build_outputs folder does not exist!"
-            exit 1
-          fi
+        run: zip -r release-artifacts.zip build_outputs
 
       - name: Upload GitHub Release
         uses: softprops/action-gh-release@v2
@@ -117,3 +138,4 @@ jobs:
           files: release-artifacts.zip
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
