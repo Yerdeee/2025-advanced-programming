@@ -111,19 +111,19 @@ jobs:
     steps:
       - uses: actions/checkout@v3
 
-      - name: Download Build Outputs
+      - name: Download C# Build Outputs
         uses: actions/download-artifact@v3
         with:
           name: csharp-build-outputs
           path: build_outputs/csharp
 
-      - name: Download Build Outputs (C++)
+      - name: Download C++ Build Outputs
         uses: actions/download-artifact@v3
         with:
           name: cpp-build-outputs
           path: build_outputs/cpp
 
-      - name: Download Build Outputs (Kotlin)
+      - name: Download Kotlin Build Outputs
         uses: actions/download-artifact@v3
         with:
           name: kotlin-build-outputs
@@ -138,4 +138,3 @@ jobs:
           files: release-artifacts.zip
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
