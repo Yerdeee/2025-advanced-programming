@@ -35,7 +35,7 @@ jobs:
           cp -r $project_dir/bin/Release/* build_outputs/csharp/$(basename $project_dir)/
 
       - name: Upload C# Build Outputs
-        uses: actions/upload-artifact@v2  # 수정된 버전
+        uses: actions/upload-artifact@v4  # 수정된 버전
         with:
           name: csharp-build-outputs
           path: build_outputs/csharp
@@ -65,7 +65,7 @@ jobs:
           g++ ${{ matrix.project }}/*.cpp -o build_outputs/cpp/$(basename ${{ matrix.project }})/app
 
       - name: Upload C++ Build Outputs
-        uses: actions/upload-artifact@v2  # 수정된 버전
+        uses: actions/upload-artifact@v4  # 수정된 버전
         with:
           name: cpp-build-outputs
           path: build_outputs/cpp
@@ -97,7 +97,7 @@ jobs:
           kotlinc $kt_file -include-runtime -d $output_dir/$(basename $kt_file .kt).jar
 
       - name: Upload Kotlin Build Outputs
-        uses: actions/upload-artifact@v2  # 수정된 버전
+        uses: actions/upload-artifact@v4  # 수정된 버전
         with:
           name: kotlin-build-outputs
           path: build_outputs/kotlin
@@ -112,19 +112,19 @@ jobs:
       - uses: actions/checkout@v3
 
       - name: Download C# Build Outputs
-        uses: actions/download-artifact@v3
+        uses: actions/download-artifact@v4
         with:
           name: csharp-build-outputs
           path: build_outputs/csharp
 
       - name: Download C++ Build Outputs
-        uses: actions/download-artifact@v3
+        uses: actions/download-artifact@v4
         with:
           name: cpp-build-outputs
           path: build_outputs/cpp
 
       - name: Download Kotlin Build Outputs
-        uses: actions/download-artifact@v3
+        uses: actions/download-artifact@v4
         with:
           name: kotlin-build-outputs
           path: build_outputs/kotlin
